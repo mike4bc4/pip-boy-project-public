@@ -1,0 +1,8 @@
+# Files/directories excluded from the public repository.
+# This uses gitignore-style patterns.
+
+src/secret/cv-main.js
+src/secret/cv-style.css
+src/secret/cv.html
+src/secret/link-table.json
+src/secret/localization-table.json

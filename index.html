@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="google" content="notranslate" />
+        <title>PipBoy CV</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+
+    <body>
+        <div class="main-container">
+            <div class="app-container">
+                <canvas class="scene-canvas"></canvas>
+                <!-- APP SHELL UI -->
+                <div class="app-shell-ui-container">
+                    <!-- BLACK PANEL -->
+                    <div class="black-panel"></div>
+                    <!-- LOADING SCREEN -->
+                    <div class="loading-panel hidden">
+                        <div class="progress-bar hidden">
+                            <p class="progress-bar_label">Loading...</p>
+                            <div class="progress-bar_bar-container">
+                                <div class="progress-bar_bar-wrapper">
+                                    <div class="progress-bar_bar"></div>
+                                </div>
+                                <p class="progress-bar_bar-label">50%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- CONTINUE SCREEN -->
+                    <div class="continue-screen hidden">
+                        <p class="continue-screen_label hidden">Press any key to continue...</p>
+                    </div>
+                    <!-- FPS COUNTER -->
+                    <p class="fps-counter hidden">FPS</p>
+                </div>
+                <!-- APP UI -->
+                <div class="ui-container">
+                    <div class="hint-panel hidden">
+                        <div class="hint-box hidden">
+                            <div class="hint-box_background">
+                                <div class="hint-box_background_border-left"></div>
+                                <div class="hint-box_background_border-right"></div>
+                            </div>
+                            <div class="hint-box_hint-container">
+                                <div class="hint-box_image"></div>
+                                <p class="hint-box_text"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overlay-panel hidden">
+                        <div class="overlay-panel_muted-icon hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="error-container hidden">
+                <img src="gui/images/error.png" class="error-image" />
+                <p class="error-header">Whoops, something went really wrong!</p>
+                <p class="error-text">
+                    It appears that the application has encountered an issue. Good thing is that said error was
+                    captured. Bad thing is that you will not be able to interact with the application, sorry for that.
+                    Most likely your platform cannot use WebGPU context. Use the button below to access classic version
+                    of my CV.
+                </p>
+            </div>
+
+            <div class="cv-document-button-container">
+                <button class="cv-document-button">Open CV Document</button>
+            </div>
+        </div>
+
+        <script type="module" src="/src/main.ts"></script>
+    </body>
+</html>

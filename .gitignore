@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+./tools/publish-public.js
+
+# Other
+.continue
+.vscode/
+
+# Vite / build output
+dist/
+build/
+.vite/
+packed/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Package manager caches
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Test and coverage output
+coverage/
+.nyc_output/
+
+# TypeScript / tooling caches
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# VS Code: keep shared project config tracked, ignore local-only files.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/*.code-snippets
+*.code-workspace
+presentation_project.code-workspace
+.vscode/launch.json
+tools/publish-public.js
