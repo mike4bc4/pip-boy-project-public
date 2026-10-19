@@ -146,6 +146,8 @@ export class ItemManager implements Disposable {
         item.position.x = this.displaySize.x;
         item.position.y = positionY;
 
+        item.hitBox.set({ x: -8, y: -8, width: item.size.x + 16, height: item.size.y + 16 });
+
         // Move the item away if it would overlap with the enemy
         if (this.lastEnemy && this.lastEnemy.overlaps(item)) {
             item.position.x = this.lastEnemy.position.x + this.lastEnemy.size.x + itemToEnemyMargin;

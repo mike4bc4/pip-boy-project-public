@@ -62,8 +62,12 @@ export class VaultBoy implements Sprite, HasHitBox, HasHitBoxElement, Disposable
     private _disposed = false;
     private _stimpakCount = 1;
     private scale = 0.8;
-    private grounded = true;
+    private _grounded = true;
     private lastGrounded = true;
+
+    get grounded() {
+        return this._grounded;
+    }
 
     get animationState() {
         return this._animationState;
@@ -195,7 +199,7 @@ export class VaultBoy implements Sprite, HasHitBox, HasHitBoxElement, Disposable
         this.velocity.y = 0;
 
         this.position.y = this.ctx.groundLevel;
-        this.grounded = true;
+        this._grounded = true;
         this.lastGrounded = true;
 
         this._stimpakCount = 1;
@@ -206,12 +210,12 @@ export class VaultBoy implements Sprite, HasHitBox, HasHitBoxElement, Disposable
     tryJump() {
         this.throwIfDisposed();
 
-        if (this.grounded && this.animationState !== "frozen") {
+        if (this._grounded && this.animationState !== "frozen") {
             this.velocity.y = this.ctx.jumpImpulse;
 
             // Move slightly above the ground level
             this.position.y = this.groundLevel + 1;
-            this.grounded = false;
+            this._grounded = false;
 
             this.animationState = "jumping";
 
@@ -242,15 +246,15 @@ export class VaultBoy implements Sprite, HasHitBox, HasHitBoxElement, Disposable
             return;
         }
 
-        this.grounded = this.position.y <= this.groundLevel;
-        if (this.lastGrounded !== this.grounded && this.grounded) {
+        this._grounded = this.position.y <= this.groundLevel;
+        if (this.lastGrounded !== this._grounded && this._grounded) {
             this.animationState = "running";
             this.eventBus.vaultBoy.onGrounded.invoke();
         }
 
-        this.lastGrounded = this.grounded;
+        this.lastGrounded = this._grounded;
 
-        if (!this.grounded) {
+        if (!this._grounded) {
             this.velocity.y += this.gravity * deltaTime;
         } else {
             this.velocity.y = 0;

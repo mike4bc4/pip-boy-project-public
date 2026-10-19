@@ -22,7 +22,7 @@ export class Synth implements Enemy {
     public visualPositionOffset = { x: 0, y: 0 };
     public size = { x: 0, y: 0 };
     public hitBox = new Rect();
-    public movementSpeed = 500;
+    public movementSpeed = 520;
 
     public readonly imageElement: ImageElement;
     public readonly deathAnimation: Animation;

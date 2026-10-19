@@ -3,6 +3,7 @@ import { AudioService, AudioTrack, AudioTrackName } from "../../core/audio-servi
 import { Vertibird } from "@game/enemy/vertibird";
 import { Synth } from "@game/enemy/synth";
 import { Disposable } from "../../core/disposable";
+import { VaultBoy } from "@game/core/vault-boy";
 
 const volume = {
     run: 0.3,
@@ -18,6 +19,7 @@ const volume = {
 interface AudioManagerContext {
     eventBus: EventBus;
     audioService: AudioService;
+    vaultBoy: VaultBoy;
 }
 
 export class AudioManager implements Disposable {
@@ -116,7 +118,9 @@ export class AudioManager implements Disposable {
 
         this.listenerRemoveCallbacks.push(
             this.eventBus.game.onResumed.add(() => {
-                this.runAudioTrack?.play();
+                if (this.ctx.vaultBoy.grounded) {
+                    this.runAudioTrack?.play();
+                }
             }),
         );
 
