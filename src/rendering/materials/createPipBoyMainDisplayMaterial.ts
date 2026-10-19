@@ -27,7 +27,7 @@ import {
 } from "three/tsl";
 import * as THREE from "three/webgpu";
 import { DisplayContentRenderer } from "../../display/display-content-renderer";
-import { AssetDatabase } from "../../assets/asset-database";
+import { AssetDatabase, TextureAsset } from "../../assets/asset-database";
 
 export interface PipBoyMainDisplayMaterial {
     texture: THREE.Texture;
@@ -141,10 +141,10 @@ export function createPipBoyMainDisplayMaterial(
     const { r, g, b } = emissiveColor;
     material.emissiveNode = postProcessEmissiveNode(emissiveNode, uv1).mul(vec3(r, g, b));
 
-    material.colorNode = texture(assetDatabase.getAsset("/textures/pip_boy_display_d"), uv0);
-    material.normalMap = assetDatabase.getAsset("/textures/pip_boy_display_ngl") as THREE.Texture;
+    material.colorNode = texture(assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_display_d").texture, uv0);
+    material.normalMap = assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_display_ngl").texture as THREE.Texture;
 
-    const ormNode = texture(assetDatabase.getAsset("/textures/pip_boy_display_orm"), uv0);
+    const ormNode = texture(assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_display_orm").texture, uv0);
     material.aoNode = ormNode.r;
     material.roughnessNode = ormNode.g.pow(roughnessPower);
     material.metalnessNode = ormNode.b;

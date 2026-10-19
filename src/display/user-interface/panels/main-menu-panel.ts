@@ -4,11 +4,11 @@ import { Color } from "../../../core/Color";
 import { createComponent } from "../../../core/ComponentRegistry";
 import { DisplayContent } from "../display-content";
 import { ImageElement } from "../elements/image-element";
-import { RectElement } from "../elements/rect-element";
+import { BorderPosition, RectElement } from "../elements/rect-element";
 import { TextElement } from "../elements/text-element";
 import { RectLike } from "../elements/components/Rect";
 import { createNavigationEvents } from "./components/navigation-events";
-import { AssetDatabase } from "../../../assets/asset-database";
+import { AssetDatabase, TextureAsset } from "../../../assets/asset-database";
 import { Settings } from "../../../core/settings";
 import { Key, Localization } from "../../../localization/localization";
 import { AudioService } from "../../../core/audio-service";
@@ -22,8 +22,10 @@ import { createDisplayBlurAnimation } from "../utils/create-display-blur-animati
 import { CVPanel } from "./cv-panel";
 import { AboutPanel } from "./about-panel";
 import { UIEventBus } from "../../../user-interface/ui-event-bus";
-import { AppError } from "../../../app-error";
-import { linkTable } from '../../../secretRegistry';
+import { linkTable } from "../../../secretRegistry";
+import { assignButtonSounds } from "../utils/assign-button-sounds";
+import { Float2, Float2Like } from "../elements/components/Float2";
+import { GamePanel } from "./game-panel";
 
 const scrollProbability = 0.33;
 
@@ -48,6 +50,10 @@ export class MainMenuPanel {
     private settingsButton: ButtonElement;
     private aboutButton: ButtonElement;
 
+    private holotapeButton: ButtonElement;
+    private holotapeButtonIcon: ImageElement;
+    private holotapeButtonBorder: RectElement;
+
     private scrollAnimation: Animation;
     private blurAnimation: Animation;
 
@@ -57,6 +63,8 @@ export class MainMenuPanel {
         this.ctx = ctx;
 
         this.createElements();
+        this.createHolotapeButton();
+
         this.imageAnimation = this.createImageAnimation();
         this.localize();
 
@@ -117,9 +125,8 @@ export class MainMenuPanel {
         image.name = "image";
         image.layout.set({ x: 448, y: 160, z: 8, width: 352, height: 352 });
         image.cutout.set({ x: 0, y: 0, width: 256, height: 256 });
-        image.load(this.ctx.assetDatabase.getAssetMetadata("/textures/valentine-anim")!).catch((reason) => {
-            throw new AppError("Failed to load image", { cause: reason });
-        });
+        image.image = this.ctx.assetDatabase.getAsset<TextureAsset>("/textures/valentine-anim").image;
+
         this.displayContent.add(image);
         this.image = image;
 
@@ -183,6 +190,84 @@ export class MainMenuPanel {
         const aboutButtonBarLeft = this.createBar("about-button-bar-left", 384, 918, 64);
         const aboutButtonBarRight = this.createBar("about-button-bar-right", 832, 918, 64);
         this.displayContent.add(aboutButtonBarLeft, aboutButtonBarRight);
+    }
+
+    private createHolotapeButton() {
+        const holotapeButton = new ButtonElement();
+        this.displayContent.add(holotapeButton);
+        holotapeButton.name = "holotape-button";
+        this.holotapeButton = holotapeButton;
+
+        holotapeButton.layout.set({ x: 64, y: 860, z: 8, width: 100, height: 100 });
+        assignButtonSounds(this.ctx.audioService, holotapeButton);
+
+        holotapeButton.hoverAnimation = this.createHolotapeButtonHoverAnimation();
+        holotapeButton.pressAnimation = this.createHolotapeButtonPressAnimation();
+
+        holotapeButton.pointerEvents.addEventListener("onclick", () => {
+            this.navigationEvents.requestNavigation(GamePanel);
+        });
+
+        holotapeButton.pointerEvents.addEventListener("onpointerenter", () =>
+            this.ctx.uiEventBus.requestHint(Key.HolotapeHint),
+        );
+
+        // Actual button remains hidden, we only want button behavior, other UI
+        // elements handle visual effects.
+        holotapeButton.visible = false;
+
+        const holotapeButtonIcon = new ImageElement();
+        this.displayContent.add(holotapeButtonIcon);
+        holotapeButtonIcon.name = "holotape-button-icon";
+        this.holotapeButtonIcon = holotapeButtonIcon;
+
+        holotapeButtonIcon.image = this.ctx.assetDatabase.getAsset<TextureAsset>("/textures/holotape-icon").image;
+        holotapeButtonIcon.layout.copy(holotapeButton.layout);
+        holotapeButtonIcon.cutout.set({ x: 104, y: 8, width: 80, height: 80 });
+
+        const holotapeButtonBorder = new RectElement();
+        this.displayContent.add(holotapeButtonBorder);
+        holotapeButtonBorder.name = "holotape-button-border";
+        this.holotapeButtonBorder = holotapeButtonBorder;
+
+        holotapeButtonBorder.layout.copy(holotapeButton.layout);
+
+        holotapeButtonBorder.color = Color.transparent;
+        holotapeButtonBorder.borderColor = Color.white;
+        holotapeButtonBorder.borderPosition = BorderPosition.Inside;
+        holotapeButtonBorder.borderWidth = 6;
+    }
+
+    private createHolotapeButtonHoverAnimation() {
+        const cutoutTrack = new Track<RectLike>(
+            (cutout) => this.holotapeButtonIcon.cutout.copy(cutout),
+            (a) => a,
+        );
+
+        cutoutTrack.addKeyframe(0, { x: 104, y: 8, width: 80, height: 80 }, Easing.Step);
+        cutoutTrack.addKeyframe(1, { x: 14, y: 14, width: 68, height: 68 }, Easing.Step);
+
+        const animation = createComponent(Animation);
+        animation.addTrack(cutoutTrack);
+        return animation;
+    }
+
+    private createHolotapeButtonPressAnimation() {
+        const transformTrack = new Track<Float2Like>(
+            (scale) => {
+                this.holotapeButtonBorder.layout.scale.copy(scale);
+                this.holotapeButtonIcon.layout.scale.copy(scale);
+            },
+            (a, b, t) => new Float2().copy(a).lerp(b, t),
+        );
+
+        transformTrack.addKeyframe(0, { x: 1, y: 1 }, Easing.EaseInOutQuad);
+        transformTrack.addKeyframe(1, { x: 0.9, y: 0.9 }, Easing.EaseInOutQuad);
+
+        const animation = createComponent(Animation);
+        animation.addTrack(transformTrack);
+
+        return animation;
     }
 
     private createImageAnimation() {

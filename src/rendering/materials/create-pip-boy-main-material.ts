@@ -1,6 +1,6 @@
 import { attribute, mix, texture, uniform, vec3 } from "three/tsl";
-import { MeshStandardNodeMaterial, Texture } from "three/webgpu";
-import { AssetDatabase } from "../../assets/asset-database";
+import { MeshStandardNodeMaterial } from "three/webgpu";
+import { AssetDatabase, TextureAsset } from "../../assets/asset-database";
 
 interface Float3Like {
     x: number;
@@ -16,10 +16,10 @@ export interface PipBoyMainMaterial {
 
 export function createPipBoyMainMaterial(assetDatabase: AssetDatabase) {
     const [diffuseTexture, normalTexture, ormTexture, labelMaskTexture] = [
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_main_d"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_main_ngl"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_main_orm"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_labels_m"),
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_main_d").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_main_ngl").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_main_orm").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_labels_m").texture,
     ];
 
     const material = new MeshStandardNodeMaterial({

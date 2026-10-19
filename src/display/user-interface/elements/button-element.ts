@@ -225,14 +225,14 @@ export class ButtonElement implements VisualElement {
     }
 
     copyStyle(style: ButtonStyle) {
-        this.color = style.color;
+        this.color = style.color.clone();
         this.borderWidth = style.borderWidth;
-        this.borderColor = style.borderColor;
+        this.borderColor = style.borderColor.clone();
         this.borderPosition = style.borderPosition;
         this.fontSize = style.fontSize;
         this.fontFamily = style.fontFamily;
         this.fallbackFontFamily = style.fallbackFontFamily;
-        this.fontColor = style.fontColor;
+        this.fontColor = style.fontColor.clone();
         this.align = style.align;
         this.baseline = style.baseline;
         this.clip = style.clip;

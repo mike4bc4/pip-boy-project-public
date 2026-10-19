@@ -1,4 +1,5 @@
 import { Component } from "../core/ComponentRegistry";
+import { throwIfDisposed } from "../core/disposable";
 import { Track } from "./track";
 
 export type AnimationStatus = "stopped" | "finished";
@@ -6,7 +7,7 @@ export type AnimationStatus = "stopped" | "finished";
 type ResolveCallback = (status: AnimationStatus) => void;
 
 export class Animation implements Component {
-    public _enabled = false;
+    public enabled = false;
 
     private _time = 0;
     private tracks = new Set<Track<any>>();
@@ -14,12 +15,15 @@ export class Animation implements Component {
     private resolve: ResolveCallback | null = null;
     private completionPromise: Promise<AnimationStatus> | null = null;
     private loop = false;
+    private _disposed = false;
 
-    get enabled() {
-        return this._enabled;
+    get disposed() {
+        return this._disposed;
     }
 
     set time(value) {
+        this.throwIfDisposed();
+
         this._time = Math.min(Math.max(0, value), this.length);
         if (this.tracks.size > 0) {
             this.evaluateTracks();
@@ -47,8 +51,14 @@ export class Animation implements Component {
         return length;
     }
 
+    constructor() {
+        Object.assign(this, { throwIfDisposed });
+    }
+
+    declare private throwIfDisposed: typeof throwIfDisposed;
+
     update(deltaTime: number) {
-        if (!this._enabled) {
+        if (!this.enabled) {
             return;
         }
 
@@ -59,7 +69,7 @@ export class Animation implements Component {
         if (reachedEnd && !this.loop) {
             this._time = this.timeMultiplier > 0 ? this.length : 0;
             this.evaluateTracks();
-            this._enabled = false;
+            this.enabled = false;
             this.resolve?.("finished");
             return;
         }
@@ -76,6 +86,8 @@ export class Animation implements Component {
     }
 
     addTrack<T>(track: Track<T>) {
+        this.throwIfDisposed();
+
         this.tracks.add(track);
     }
 
@@ -84,15 +96,17 @@ export class Animation implements Component {
     }
 
     stop() {
-        this._enabled = false;
+        this.enabled = false;
         this.resolve?.("stopped");
     }
 
     pause() {
-        this._enabled = false;
+        this.enabled = false;
     }
 
     async play({ timeMultiplier = 1, loop = false } = {}) {
+        this.throwIfDisposed();
+
         if (timeMultiplier === 0 || this.tracks.size === 0) {
             return Promise.resolve("finished" as AnimationStatus);
         }
@@ -100,7 +114,7 @@ export class Animation implements Component {
         this.timeMultiplier = timeMultiplier;
         this.loop = loop;
 
-        this._enabled = timeMultiplier != 0;
+        this.enabled = timeMultiplier != 0;
         if (this.completionPromise) {
             return this.completionPromise;
         }
@@ -121,5 +135,16 @@ export class Animation implements Component {
         for (const track of tracks) {
             track.evaluate(this._time);
         }
+    }
+
+    dispose() {
+        if (this.disposed) {
+            return;
+        }
+
+        this._disposed = true;
+
+        this.stop();
+        this.tracks.clear();
     }
 }

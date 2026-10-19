@@ -17,7 +17,7 @@ import {
     maxMipLevel,
 } from "three/tsl";
 import { FrontSide, MeshBasicNodeMaterial, Texture } from "three/webgpu";
-import { AssetDatabase } from "../../assets/asset-database";
+import { AssetDatabase, TextureAsset } from "../../assets/asset-database";
 
 interface Float3Like {
     x: number;
@@ -39,8 +39,8 @@ export interface PipBoyGlassMaterial {
 
 export function createPipBoyGlassMaterial(assetDatabase: AssetDatabase) {
     const [reflectionTexture, dirtMask] = [
-        assetDatabase.getAsset<Texture>("/textures/background"),
-        assetDatabase.getAsset<Texture>("/textures/glass_m"),
+        assetDatabase.getAsset<TextureAsset>("/textures/background").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/glass_m").texture,
     ];
 
     const baseColor = uniform(vec3(0.15, 0.18, 0.2));

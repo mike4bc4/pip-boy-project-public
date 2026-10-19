@@ -1,6 +1,6 @@
 import { texture, uniform } from "three/tsl";
-import { MeshStandardNodeMaterial, Texture } from "three/webgpu";
-import { AssetDatabase } from "../../assets/asset-database";
+import { MeshStandardNodeMaterial } from "three/webgpu";
+import { AssetDatabase, TextureAsset } from "../../assets/asset-database";
 
 export interface PipBoyDisplayMaterial {
     emissiveIntensity: number;
@@ -8,10 +8,10 @@ export interface PipBoyDisplayMaterial {
 
 export function createPipBoyDisplayMaterial(assetDatabase: AssetDatabase) {
     const [diffuseTexture, normalTexture, ormTexture, emissiveTexture] = [
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_display_d"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_display_ngl"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_display_orm"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_display_e"),
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_display_d").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_display_ngl").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_display_orm").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_display_e").texture,
     ];
 
     const material = new MeshStandardNodeMaterial();

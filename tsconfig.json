@@ -9,12 +9,11 @@
         "noEmit": true,
         "isolatedModules": true,
         "skipLibCheck": true,
-        "types": [
-            "vite/client"
-        ],
-        "strictPropertyInitialization": false
+        "types": ["vite/client"],
+        "strictPropertyInitialization": false,
+        "paths": {
+            "@game/*": ["./src/endless-runner/*"]
+        }
     },
-    "include": [
-        "src/**/*"
-    ]
+    "include": ["src/**/*"]
 }

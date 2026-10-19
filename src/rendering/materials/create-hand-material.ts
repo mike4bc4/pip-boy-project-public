@@ -1,11 +1,11 @@
-import { MeshStandardNodeMaterial, Texture } from "three/webgpu";
-import { AssetDatabase } from "../../assets/asset-database";
+import { MeshStandardNodeMaterial } from "three/webgpu";
+import { AssetDatabase, TextureAsset } from "../../assets/asset-database";
 import { float, normalMap, texture } from "three/tsl";
 
 export function createHandMaterial(assetDatabase: AssetDatabase) {
-    const diffuse = assetDatabase.getAsset<Texture>("/textures/arm_d");
-    const normal = assetDatabase.getAsset<Texture>("/textures/arm_ngl");
-    const orm = assetDatabase.getAsset<Texture>("/textures/arm_orm");
+    const diffuse = assetDatabase.getAsset<TextureAsset>("/textures/arm_d").texture;
+    const normal = assetDatabase.getAsset<TextureAsset>("/textures/arm_ngl").texture;
+    const orm = assetDatabase.getAsset<TextureAsset>("/textures/arm_orm").texture;
 
     const material = new MeshStandardNodeMaterial();
     material.map = diffuse;

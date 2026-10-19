@@ -1,12 +1,12 @@
 import { texture } from "three/tsl";
-import { AssetDatabase } from "../../assets/asset-database";
-import { MeshStandardNodeMaterial, Texture } from "three/webgpu";
+import { AssetDatabase, TextureAsset } from "../../assets/asset-database";
+import { MeshStandardNodeMaterial } from "three/webgpu";
 
 export function createArmMaterial(assetDatabase: AssetDatabase) {
     const [diffuseTexture, normalTexture, ormTexture] = [
-        assetDatabase.getAsset<Texture>("/textures/arm_d"),
-        assetDatabase.getAsset<Texture>("/textures/arm_ngl"),
-        assetDatabase.getAsset<Texture>("/textures/arm_orm"),
+        assetDatabase.getAsset<TextureAsset>("/textures/arm_d").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/arm_ngl").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/arm_orm").texture,
     ];
 
     const material = new MeshStandardNodeMaterial();

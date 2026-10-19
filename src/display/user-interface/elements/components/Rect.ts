@@ -42,4 +42,13 @@ export class Rect {
     containsPoint(x: number, y: number) {
         return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
     }
+
+    overlaps(rect: RectLike): boolean {
+        return (
+            this.x < rect.x + rect.width &&
+            this.x + this.width > rect.x &&
+            this.y < rect.y + rect.height &&
+            this.y + this.height > rect.y
+        );
+    }
 }

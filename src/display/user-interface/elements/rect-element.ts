@@ -28,15 +28,16 @@ export class RectElement implements VisualElement {
     public borderColor = Color.transparent;
     public borderPosition = BorderPosition.Middle;
     public mask: Rect | null = null;
+    public compositeOperation: GlobalCompositeOperation = "source-over";
 
     public readonly onPrepare = new Action<[context: CanvasRenderingContext2D]>();
     public readonly layout = new Layout();
     public readonly pointerEvents = createPointerEvents();
 
     copyStyle(style: RectElementStyle) {
-        this.color = style.color;
+        this.color = style.color.clone();
         this.borderWidth = style.borderWidth;
-        this.borderColor = style.borderColor;
+        this.borderColor = style.borderColor.clone();
         this.borderPosition = style.borderPosition;
     }
 
@@ -45,6 +46,8 @@ export class RectElement implements VisualElement {
         const pivotY = this.layout.y + this.layout.pivot.y * this.layout.height;
 
         context.save();
+
+        context.globalCompositeOperation = this.compositeOperation;
         context.translate(this.layout.offset.x, this.layout.offset.y);
         context.translate(pivotX, pivotY);
         context.scale(this.layout.scale.x, this.layout.scale.y);

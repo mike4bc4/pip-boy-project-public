@@ -1,6 +1,6 @@
 import { attribute, Fn, texture, uniform, vec3 } from "three/tsl";
-import { AssetDatabase } from "../../assets/asset-database";
-import { MeshStandardNodeMaterial, Node, Texture } from "three/webgpu";
+import { AssetDatabase, TextureAsset } from "../../assets/asset-database";
+import { MeshStandardNodeMaterial, Node } from "three/webgpu";
 
 export interface PipBoyPartsMaterial {
     emissiveIntensity: number;
@@ -14,10 +14,10 @@ const vertexColorWithFallback = Fn(({ geometry }) => {
 
 export function createPipBoyPartsMaterial(assetDatabase: AssetDatabase) {
     const [diffuse, normal, orm, emissive] = [
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_parts_d"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_parts_ngl"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_parts_orm"),
-        assetDatabase.getAsset<Texture>("/textures/pip_boy_parts_e"),
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_parts_d").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_parts_ngl").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_parts_orm").texture,
+        assetDatabase.getAsset<TextureAsset>("/textures/pip_boy_parts_e").texture,
     ];
 
     const powerButton = uniform(1.0);

@@ -3,20 +3,11 @@ import { Background } from "./background";
 import { Environment } from "./environment";
 import { createArmSkinnedMesh } from "../objects/create-arm-skinned-mesh";
 import { createPipBoyMesh } from "../objects/create-pip-boy-mesh-object";
-import { AssetDatabase } from "../assets/asset-database";
+import { AssetDatabase, TextureAsset } from "../assets/asset-database";
 import { Scene as GameScene } from "./scene-manager";
 import { GameObject } from "../core/game-object";
 import { createRightArm } from "../objects/create-right-arm";
-import {
-    AmbientLight,
-    Color,
-    DirectionalLight,
-    Light,
-    Material,
-    Mesh,
-    PerspectiveCamera,
-    Scene,
-} from "three/webgpu";
+import { AmbientLight, Color, DirectionalLight, Light, Material, Mesh, PerspectiveCamera, Scene } from "three/webgpu";
 import { AppError } from "../app-error";
 import { PipBoyMainDisplayMaterial } from "../rendering/materials/createPipBoyMainDisplayMaterial";
 
@@ -60,8 +51,12 @@ export class MainScene implements GameScene {
         root.background = new Color(0x202020);
         this._root = root;
 
-        this._background = createComponent(Background, this._root, assetDatabase.getAsset("/textures/background"));
-        this._environment = new Environment(root, assetDatabase.getAsset("/textures/forest"));
+        this._background = createComponent(
+            Background,
+            this._root,
+            assetDatabase.getAsset<TextureAsset>("/textures/background").texture,
+        );
+        this._environment = new Environment(root, assetDatabase.getAsset<TextureAsset>("/textures/forest").texture);
 
         const ambientLight = new AmbientLight(0xffffff, 1.0);
         ambientLight.name = "ambient-light";

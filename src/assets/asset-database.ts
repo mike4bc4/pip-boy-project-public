@@ -31,6 +31,16 @@ export class AudioAsset {
     }
 }
 
+export class TextureAsset {
+    public readonly texture: THREE.Texture | THREE.DataTexture;
+    public readonly image?: HTMLImageElement;
+
+    constructor(texture: THREE.Texture | THREE.DataTexture, image?: HTMLImageElement) {
+        this.texture = texture;
+        this.image = image;
+    }
+}
+
 export class OggLoader {
     async loadAsync(record: AssetRecord) {
         const response = await fetch(record.url);
@@ -39,7 +49,7 @@ export class OggLoader {
     }
 }
 
-export type Asset = GLTF | THREE.Texture | THREE.DataTexture | AudioAsset;
+export type Asset = GLTF | TextureAsset | AudioAsset;
 export type AssetConstructor<T extends Asset> = new (...args: any[]) => T;
 
 export class AssetDatabase implements Disposable {
@@ -101,6 +111,27 @@ export class AssetDatabase implements Disposable {
         return this.recordsById.get(id);
     }
 
+    private async createTextureAsset(texture: THREE.Texture | THREE.DataTexture, record: AssetRecord) {
+        const textureAssetRecord = record as TextureAssetRecord;
+        this.configureTexture(texture, textureAssetRecord);
+
+        if (textureAssetRecord.preloadImage) {
+            const image = new Image();
+
+            await new Promise((resolve, reject) => {
+                image.onload = resolve;
+                image.onerror = reject;
+                image.src = textureAssetRecord.url;
+            }).catch((error) => {
+                throw new AppError("Failed to load image.", { cause: error });
+            });
+
+            return new TextureAsset(texture, image);
+        }
+
+        return new TextureAsset(texture);
+    }
+
     private async loadAsset(record: AssetRecord) {
         let asset: Asset | null = null;
 
@@ -111,13 +142,15 @@ export class AssetDatabase implements Disposable {
 
             case AssetType.PNG:
             case AssetType.JPG:
-                asset = await this.textureLoader.loadAsync(record.url);
+                const texture = await this.textureLoader.loadAsync(record.url);
+                asset = await this.createTextureAsset(texture, record);
                 break;
 
-            case AssetType.EXR:
-                asset = await this.exrLoader.loadAsync(record.url);
+            case AssetType.EXR: {
+                const texture = await this.exrLoader.loadAsync(record.url);
+                asset = await this.createTextureAsset(texture, record);
                 break;
-
+            }
             case AssetType.OGG:
                 asset = await this.oggLoader.loadAsync(record);
                 break;
@@ -126,9 +159,21 @@ export class AssetDatabase implements Disposable {
                 throw new AppError(`Unsupported asset type: "${record.type}".`);
         }
 
-        if (asset instanceof THREE.Texture) {
-            this.configureTexture(asset, record as TextureAssetRecord);
-        }
+        // if (asset instanceof THREE.Texture) {
+        //     if (textureAssetRecord.preloadImage) {
+        //         const image = new Image();
+        //         image.src = textureAssetRecord.url;
+
+        //         await new Promise((resolve, reject) => {
+        //             image.onload = resolve;
+        //             image.onerror = reject;
+        //         }).catch((error) => {
+        //             throw new AppError("Failed to load image.", { cause: error });
+        //         });
+
+        //         this.loadedImages.set(textureAssetRecord.id, image);
+        //     }
+        // }
 
         return asset;
     }
@@ -166,7 +211,7 @@ export class AssetDatabase implements Disposable {
 
         for (const record of [...this.recordsById.values()]) {
             if (record instanceof TextureAssetRecord) {
-                textures.push({ record, texture: this.getAsset(record.id) });
+                textures.push({ record, texture: this.getAsset<TextureAsset>(record.id).texture });
             }
         }
 
@@ -252,8 +297,8 @@ export class AssetDatabase implements Disposable {
                         }
                     }
                 });
-            } else if (asset instanceof THREE.Texture || asset instanceof THREE.DataTexture) {
-                asset.dispose();
+            } else if (asset instanceof TextureAsset) {
+                asset.texture.dispose();
             }
         }
 

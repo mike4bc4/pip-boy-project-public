@@ -1,5 +1,5 @@
 import { Settings } from "../core/settings";
-import { localizationTable } from '../secretRegistry';
+import { localizationTable } from "../secretRegistry";
 
 export enum Key {
     Loading = "loading",
@@ -49,6 +49,24 @@ export enum Key {
     AboutText = "aboutText",
     GitHubHint = "gitHubHint",
     PortfolioHint = "portfolioHint",
+    Help = "help",
+    Jump = "jump",
+    Space = "space",
+    Shoot = "shoot",
+    ControlLeft = "controlLeft",
+    CollectItems = "collectItems",
+    DestroyEnemies = "destroyEnemies",
+    BestScore = "bestScore",
+    Play = "play",
+    Score = "score",
+    GameOver = "gameOver",
+    GameOverText = "gameOverText",
+    JumpToStart = "jumpToStart",
+    TapLeft = "tapLeft",
+    TapRight = "tapRight",
+    HolotapeHint = "holotapeHint",
+    ReadingHolotape = "readingHolotape",
+    Quit = "quit",
 }
 
 export enum Locale {

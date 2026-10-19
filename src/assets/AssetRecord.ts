@@ -3,6 +3,7 @@ import { AssetType, ColorSpace } from "./assetTypes";
 export interface TextureConfig {
     colorSpace: ColorSpace;
     flipY: boolean;
+    preloadImage: boolean;
 }
 
 export interface AssetRecord {
@@ -30,6 +31,7 @@ export class TextureAssetRecord implements AssetRecord {
 
     public readonly colorSpace: ColorSpace;
     public readonly flipY: boolean;
+    public readonly preloadImage: boolean;
 
     constructor(id: string, type: AssetType, url: string, config: TextureConfig) {
         this.id = id;
@@ -38,6 +40,7 @@ export class TextureAssetRecord implements AssetRecord {
 
         this.colorSpace = config.colorSpace;
         this.flipY = config.flipY;
+        this.preloadImage = config.preloadImage;
     }
 }
 

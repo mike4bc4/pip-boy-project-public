@@ -121,6 +121,8 @@ export class App implements Disposable {
         await loadingPanel.hideProgressBar(true);
         loadingPanel.hide();
 
+        return;
+
         continuePanel.show();
         continuePanel.showLabel(true);
 
@@ -166,7 +168,7 @@ export class App implements Disposable {
             this.inputSystem = InputSystem.create(this.appContainer.canvas);
             this.rendererService = await RendererService.create(this.appContainer, this.settings, this.timerService);
             this.assetDatabase = AssetDatabase.create();
-            this.audioService = await AudioService.create(this.inputSystem, this.settings, this.timerService);
+            this.audioService = await AudioService.create(this.inputSystem, this.settings);
             this.cameraSystem = CameraSystem.create(this.appContainer, this.inputSystem, this.settings);
             this.appShellUI = AppShellUI.create(this.settings, this.localization);
             this.sceneManager = SceneManager.create(this.assetDatabase, MainScene);

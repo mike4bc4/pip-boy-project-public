@@ -1,7 +1,6 @@
 import { Animation } from "../../../animation/animation";
 import { Easing, Track } from "../../../animation/track";
-import { AppError } from "../../../app-error";
-import { AssetDatabase } from "../../../assets/asset-database";
+import { AssetDatabase, TextureAsset } from "../../../assets/asset-database";
 import { AudioService } from "../../../core/audio-service";
 import { createComponent } from "../../../core/ComponentRegistry";
 import { Settings } from "../../../core/settings";
@@ -161,49 +160,31 @@ export class CVPanel implements Panel {
         this.aboutPage = createPageElement(pageElementOptions);
         this.displayContent.add(this.aboutPage);
 
-        this.aboutPage.image
-            .load(this.ctx.assetDatabase.getAssetMetadata("/textures/minutemen-anim")!)
-            .catch((reason) => {
-                throw new AppError("Failed to load image", { cause: reason });
-            });
+        this.aboutPage.image.image = this.ctx.assetDatabase.getAsset<TextureAsset>("/textures/minutemen-anim").image;
         this.aboutPage.image.cutout.set({ x: 0, y: 0, width: 256, height: 256 });
 
         this.contactPage = createPageElement(pageElementOptions);
         this.displayContent.add(this.contactPage);
 
-        this.contactPage.image
-            .load(this.ctx.assetDatabase.getAssetMetadata("/textures/patrol-anim")!)
-            .catch((reason) => {
-                throw new AppError("Failed to load image", { cause: reason });
-            });
+        this.contactPage.image.image = this.ctx.assetDatabase.getAsset<TextureAsset>("/textures/patrol-anim").image;
         this.contactPage.image.cutout.set({ x: 0, y: 0, width: 256, height: 256 });
 
         this.educationPage = createPageElement(pageElementOptions);
         this.displayContent.add(this.educationPage);
 
-        this.educationPage.image
-            .load(this.ctx.assetDatabase.getAssetMetadata("/textures/minds-anim")!)
-            .catch((reason) => {
-                throw new AppError("Failed to load image", { cause: reason });
-            });
+        this.educationPage.image.image = this.ctx.assetDatabase.getAsset<TextureAsset>("/textures/minds-anim").image;
         this.educationPage.image.cutout.set({ x: 0, y: 0, width: 256, height: 256 });
 
         this.careerPage = createPageElement(pageElementOptions);
         this.displayContent.add(this.careerPage);
 
-        this.careerPage.image
-            .load(this.ctx.assetDatabase.getAssetMetadata("/textures/support-anim")!)
-            .catch((reason) => {
-                throw new AppError("Failed to load image", { cause: reason });
-            });
+        this.careerPage.image.image = this.ctx.assetDatabase.getAsset<TextureAsset>("/textures/support-anim").image;
         this.careerPage.image.cutout.set({ x: 0, y: 0, width: 256, height: 256 });
 
         this.skillsPage = createPageElement(pageElementOptions);
         this.displayContent.add(this.skillsPage);
 
-        this.skillsPage.image.load(this.ctx.assetDatabase.getAssetMetadata("/textures/wire-anim")!).catch((reason) => {
-            throw new AppError("Failed to load image", { cause: reason });
-        });
+        this.skillsPage.image.image = this.ctx.assetDatabase.getAsset<TextureAsset>("/textures/wire-anim").image;
         this.skillsPage.image.cutout.set({ x: 0, y: 0, width: 256, height: 256 });
 
         // Initially all pages are hidden as their visibility will be toggled by button bar.

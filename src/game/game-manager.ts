@@ -25,6 +25,7 @@ import { NoiseGenerator } from "./noise-generator";
 import { TimerService } from "../core/timer-service";
 import { AppError } from "../app-error";
 import { Disposable } from "../core/disposable";
+import { GamePanel } from "../display/user-interface/panels/game-panel";
 
 interface GameManagerDependencies {
     timerService: TimerService;
@@ -104,34 +105,40 @@ export class GameManager implements Component, Disposable {
         const arm = this.mainScene.getObjectByName("arm") as SkinnedMeshObject;
         const rightArm = this.mainScene.getObjectByName("right-arm") as SkinnedMeshObject;
 
-        await arm.playAnimation("look_around");
+        arm.playAnimation("pipboy_idle", { loop: true });
+        rightArm.playAnimation("right-arm-idle", { loop: true });
+        this.displayManager.navigate(MainMenuPanel);
 
-        this.ctx.timerService.timeout(
-            () => {
-                this.displayManager.navigate(BootPanel).catch((reason) => {
-                    throw new AppError("Failed to navigate to boot panel", { cause: reason });
-                });
-            },
-            2,
-            true,
-        );
+        //----
 
-        this.ctx.timerService.timeout(
-            () => {
-                this.mainScene.background.blur(1.5).catch((reason) => {
-                    throw new AppError("Failed to blur the background.", { cause: reason });
-                });
-            },
-            1,
-            true,
-        );
+        // await arm.playAnimation("look_around");
 
-        await Promise.all([arm.playAnimation("pipboy_reach"), rightArm.playAnimation("right-arm-reach")]);
+        // this.ctx.timerService.timeout(
+        //     () => {
+        //         this.displayManager.navigate(BootPanel).catch((reason) => {
+        //             throw new AppError("Failed to navigate to boot panel", { cause: reason });
+        //         });
+        //     },
+        //     2,
+        //     true,
+        // );
 
-        await Promise.all([
-            arm.playAnimation("pipboy_idle", { loop: true }),
-            rightArm.playAnimation("right-arm-idle", { loop: true }),
-        ]);
+        // this.ctx.timerService.timeout(
+        //     () => {
+        //         this.mainScene.background.blur(1.5).catch((reason) => {
+        //             throw new AppError("Failed to blur the background.", { cause: reason });
+        //         });
+        //     },
+        //     1,
+        //     true,
+        // );
+
+        // await Promise.all([arm.playAnimation("pipboy_reach"), rightArm.playAnimation("right-arm-reach")]);
+
+        // await Promise.all([
+        //     arm.playAnimation("pipboy_idle", { loop: true }),
+        //     rightArm.playAnimation("right-arm-idle", { loop: true }),
+        // ]);
     }
 
     dispose(): void {

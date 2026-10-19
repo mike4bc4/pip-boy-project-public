@@ -37,7 +37,8 @@ export class DisplayContent {
     }
 
     draw(context: CanvasRenderingContext2D) {
-        context.clearRect(0, 0, this.width, this.height);
+        context.fillStyle = "#000000FF";
+        context.fillRect(0, 0, this.width, this.height);
 
         const drawContexts: DrawContext[] = [];
         for (const element of this.getElements()) {

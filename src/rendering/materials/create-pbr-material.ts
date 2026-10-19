@@ -1,11 +1,11 @@
-import { MeshStandardNodeMaterial, Texture } from "three/webgpu";
-import { AssetDatabase } from "../../assets/asset-database";
+import { MeshStandardNodeMaterial } from "three/webgpu";
+import { AssetDatabase, TextureAsset } from "../../assets/asset-database";
 
 export function createPBRMaterial(assetDatabase: AssetDatabase, diffuseID: string, normalID: string, ormID: string) {
     const [diffuse, normal, orm] = [
-        assetDatabase.getAsset<Texture>(diffuseID),
-        assetDatabase.getAsset<Texture>(normalID),
-        assetDatabase.getAsset<Texture>(ormID),
+        assetDatabase.getAsset<TextureAsset>(diffuseID).texture,
+        assetDatabase.getAsset<TextureAsset>(normalID).texture,
+        assetDatabase.getAsset<TextureAsset>(ormID).texture,
     ];
 
     const material = new MeshStandardNodeMaterial({

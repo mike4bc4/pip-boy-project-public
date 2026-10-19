@@ -1,6 +1,6 @@
 import { Animation } from "../../../animation/animation";
 import { Easing, Track } from "../../../animation/track";
-import { AssetDatabase } from "../../../assets/asset-database";
+import { AssetDatabase, TextureAsset } from "../../../assets/asset-database";
 import { Color, ColorLike } from "../../../core/Color";
 import { createComponent } from "../../../core/ComponentRegistry";
 import { DisplayContent } from "../display-content";
@@ -50,8 +50,12 @@ export class InitPanel implements Panel {
         this.pulseAnimation.time = 0;
         this.imageAnimation.time = 0;
 
-        this.ctx.audioService.play(AudioTrackName.Tweet);
-        this.terminalLowFrequencyAudioTrack = this.ctx.audioService.play(AudioTrackName.TerminalLowFrequency, true);
+        this.ctx.audioService.createAudioTrack(AudioTrackName.Tweet).play();
+        this.terminalLowFrequencyAudioTrack = this.ctx.audioService.createAudioTrack(
+            AudioTrackName.TerminalLowFrequency,
+        );
+        this.terminalLowFrequencyAudioTrack.loop = true;
+        this.terminalLowFrequencyAudioTrack.play();
 
         this.pulseAnimation.play({ timeMultiplier: pulseAnimationSpeed, loop: true });
 
@@ -72,7 +76,7 @@ export class InitPanel implements Panel {
 
     async exit() {
         this.terminalLowFrequencyAudioTrack?.stop(0.5);
-        this.ctx.audioService.play(AudioTrackName.Twoot);
+        this.ctx.audioService.createAudioTrack(AudioTrackName.Twoot).play();
 
         this.pulseAnimation.stop();
         this.imageAnimation.stop();
@@ -82,9 +86,7 @@ export class InitPanel implements Panel {
 
     private createElements() {
         const imageElement = new ImageElement();
-        imageElement.load(this.ctx.assetDatabase.getAssetMetadata("/textures/thumb-up-anim")!).catch((reason) => {
-            throw new AppError("Failed to load image.", { cause: reason });
-        });
+        imageElement.image = this.ctx.assetDatabase.getAsset<TextureAsset>("/textures/thumb-up-anim").image;
         imageElement.cutout.set({ x: 0, y: 0, width: 256, height: 256 });
         imageElement.layout.set({ x: 416, y: 272, width: 400, height: 400 });
 

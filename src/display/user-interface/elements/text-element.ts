@@ -34,11 +34,11 @@ export class TextElement implements VisualElement {
     public readonly layout = new Layout();
     public readonly pointerEvents = createPointerEvents();
 
-    public copyStyle(style: TextElementStyle) {
+ copyStyle(style: TextElementStyle) {
         this.fontSize = style.fontSize;
         this.fontFamily = style.fontFamily;
         this.fallbackFontFamily = style.fallbackFontFamily;
-        this.color = style.color;
+        this.color = style.color.clone();
         this.align = style.align;
         this.baseline = style.baseline;
         this.clip = style.clip;

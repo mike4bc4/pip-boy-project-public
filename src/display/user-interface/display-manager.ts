@@ -5,6 +5,7 @@ import { Component } from "../../core/ComponentRegistry";
 import { Settings } from "../../core/settings";
 import { TimerService } from "../../core/timer-service";
 import { DisplayInteraction } from "../../input/display-interaction";
+import { InputSystem } from "../../input/input-system";
 import { Localization } from "../../localization/localization";
 import { UIEventBus } from "../../user-interface/ui-event-bus";
 import { DisplayContentRenderer } from "../display-content-renderer";
@@ -13,6 +14,7 @@ import { AboutPanel } from "./panels/about-panel";
 import { BootPanel } from "./panels/boot-panel";
 import { NavigationEvents, NavigationEventsInternal } from "./panels/components/navigation-events";
 import { CVPanel } from "./panels/cv-panel";
+import { GamePanel } from "./panels/game-panel";
 import { InitPanel } from "./panels/init-panel";
 import { MainMenuPanel } from "./panels/main-menu-panel";
 import { SettingsPanel } from "./panels/settings-panel";
@@ -45,6 +47,7 @@ interface DisplayManagerContext {
     settings: Settings;
     audioService: AudioService;
     uiEventBus: UIEventBus;
+    inputSystem: InputSystem;
 }
 
 export class DisplayManager implements Component {
@@ -74,6 +77,7 @@ export class DisplayManager implements Component {
         this.addPanel(new SettingsPanel(ctx));
         this.addPanel(new CVPanel(ctx));
         this.addPanel(new AboutPanel(ctx));
+        this.addPanel(new GamePanel(ctx));
     }
 
     get currentPanel() {

@@ -4,9 +4,6 @@ import { InputSystem } from "../input/input-system";
 import { Action } from "./Action";
 import { Disposable } from "./disposable";
 import { Settings } from "./settings";
-import { Timer, TimerService } from "./timer-service";
-
-const playTimeout = 0.05;
 
 export enum AudioTrackName {
     TerminalHighFrequency = "/audio/terminal-high-frequency",
@@ -17,123 +14,169 @@ export enum AudioTrackName {
     Cancel = "/audio/cancel",
     OK = "/audio/ok",
     Focus = "/audio/focus",
+    Death = "/audio/game/death",
+    Jump = "/audio/game/jump",
+    PickUp = "/audio/game/pick-up",
+    Run = "/audio/game/run",
+    Shoot = "/audio/game/shoot",
+    StimpakUse = "/audio/game/stimpak-use",
+    SynthDeath = "/audio/game/synth-death",
+    VertibirdDeath = "/audio/game/vertibird-death",
 }
 
 export interface AudioTrack {
-    stop: (fadeTime: number) => void;
+    loop: boolean;
+    volume: number;
+
+    stop(fadeTime: number): void;
+    pause(): AudioTrack;
+    play(): AudioTrack;
+    rewind(): AudioTrack;
 }
 
-class AudioTrackInternal implements AudioTrack, Disposable {
+class AudioTrackImpl implements AudioTrack {
     public readonly onEnded = new Action();
 
     private context: AudioContext;
-    private source: AudioBufferSourceNode;
-    private gain: GainNode;
-    private stopRequested = false;
-    private started = false;
-    private _disposed = false;
+    private masterGain: GainNode;
+    private audioBuffer: AudioBuffer;
 
-    get disposed() {
-        return this._disposed;
+    private source: AudioBufferSourceNode | null = null;
+    private gain: GainNode | null = null;
+
+    private state: "started" | "stopped" | "paused" | "stop-requested" = "paused";
+    private pauseOffset = 0;
+    private startTime = 0;
+
+    private _loop = false;
+    private _volume = 1;
+
+    get loop() {
+        return this._loop;
     }
 
-    init(context: AudioContext, source: AudioBufferSourceNode, gain: GainNode) {
-        this.throwIfDisposed();
+    set loop(value) {
+        this._loop = value;
+        if (this.source) {
+            this.source.loop = value;
+        }
+    }
 
+    get volume() {
+        return this._volume;
+    }
+
+    set volume(value) {
+        this._volume = value;
+        if (this.gain) {
+            this.gain.gain.value = value;
+        }
+    }
+
+    constructor(context: AudioContext, masterGain: GainNode, audioBuffer: AudioBuffer) {
         this.context = context;
-        this.source = source;
-        this.gain = gain;
+        this.masterGain = masterGain;
+        this.audioBuffer = audioBuffer;
+    }
 
-        const handleSourceEnded = () => {
-            this.source.removeEventListener("ended", handleSourceEnded);
-
-            if (!this.disposed) {
-                this.onEnded.invoke();
-            }
-        };
-
-        this.source.addEventListener("ended", handleSourceEnded);
+    rewind() {
+        this.pauseOffset = 0;
+        return this;
     }
 
     play() {
-        this.throwIfDisposed();
-
-        if (this.stopRequested || this.started) {
-            return;
+        if (this.state === "stopped" || this.state === "stop-requested") {
+            throw new AppError("Audio track was stopped or requested to stop, and cannot be played anymore.");
         }
 
-        this.started = true;
-        this.source.start();
-    }
-
-    stop(fadeTime: number) {
-        this.throwIfDisposed();
-
-        this.stopRequested = true;
-
-        if (!this.started) {
-            return;
+        if (this.state === "started") {
+            return this;
         }
 
-        const safeFadeTime = Math.max(0.001, fadeTime);
-        const now = this.context.currentTime;
+        this.state = "started";
+        this.startTime = this.context.currentTime;
 
-        this.gain.gain.cancelScheduledValues(now);
-        this.gain.gain.setValueAtTime(this.gain.gain.value, now);
-        this.gain.gain.linearRampToValueAtTime(0, now + safeFadeTime);
+        const source = this.context.createBufferSource();
+        this.source = source;
+        this.source.buffer = this.audioBuffer;
+        this.source.loop = this.loop;
 
-        const { promise, resolve } = Promise.withResolvers<void>();
+        const gain = this.context.createGain();
+        this.gain = gain;
+        this.gain.gain.value = this.volume;
+
         const handleSourceEnded = () => {
-            this.source.removeEventListener("ended", handleSourceEnded);
+            if (this.state !== "paused") {
+                this.state = "stopped";
 
-            if (!this.disposed) {
-                this.onEnded.invoke();
+                if (!this.onEnded.disposed) {
+                    this.onEnded.invoke();
+                }
             }
 
-            resolve();
+            source.removeEventListener("ended", handleSourceEnded);
+            source.disconnect();
+            gain.disconnect();
         };
 
         this.source.addEventListener("ended", handleSourceEnded);
-        this.source.stop(now + safeFadeTime);
 
-        return promise;
+        this.source.connect(this.gain);
+        this.gain.connect(this.masterGain);
+
+        this.source.start(0, this.pauseOffset);
+        return this;
     }
 
-    private throwIfDisposed() {
-        if (this.disposed) {
-            throw new ObjectDisposedError();
+    pause() {
+        if (this.state === "paused" || this.state === "stopped" || this.state === "stop-requested") {
+            return this;
         }
+
+        this.state = "paused";
+
+        this.pauseOffset = (this.pauseOffset + this.context.currentTime - this.startTime) % this.audioBuffer.duration;
+
+        this.source?.stop();
+        return this;
     }
 
-    dispose(): void {
-        if (this.disposed) {
+    stop(fadeTime: number) {
+        if (this.state === "stopped" || this.state === "stop-requested") {
             return;
         }
 
-        this._disposed = true;
+        if (this.state === "paused") {
+            // Source has already been stopped, but did not fire an event, so we are just
+            // triggering it manually here.
+            this.state = "stopped";
+            this.onEnded.invoke();
+            return;
+        }
 
-        // stop() can throw if start() was not called first, so we are guarding here
-        // just in case. Catch is empty as otherwise there is nothing to stop.
-        try {
+        this.state = "stop-requested";
+
+        if (fadeTime <= 0) {
             this.source?.stop();
-        } catch {}
+        } else {
+            const now = this.context.currentTime;
+            this.gain?.gain.cancelScheduledValues(now);
+            this.gain?.gain.setValueAtTime(this.gain.gain.value, now);
+            this.gain?.gain.linearRampToValueAtTime(0, now + fadeTime);
 
-        this.source?.disconnect();
-        this.gain?.disconnect();
-
-        this.onEnded.dispose();
+            this.source?.stop(now + fadeTime);
+        }
     }
 }
 
 export class AudioService implements Disposable {
     private inputSystem: InputSystem;
     private settings: Settings;
-    private timerService: TimerService;
     private context: AudioContext;
     private audioBuffers = new Map<string, AudioBuffer>();
     private masterGain: GainNode;
     private _disposed = false;
-    private audioTracks = new Set<AudioTrackInternal>();
+    private audioTracks = new Set<AudioTrackImpl>();
 
     get disposed() {
         return this._disposed;
@@ -145,10 +188,9 @@ export class AudioService implements Disposable {
 
     private constructor() {}
 
-    private async init(inputSystem: InputSystem, settings: Settings, timerService: TimerService) {
+    private async init(inputSystem: InputSystem, settings: Settings) {
         this.inputSystem = inputSystem;
         this.settings = settings;
-        this.timerService = timerService;
 
         this.context = new AudioContext();
 
@@ -156,6 +198,8 @@ export class AudioService implements Disposable {
         this.inputSystem.onPointerUp.add(this.handleKeyDownOrPointerUp);
 
         this.masterGain = this.context.createGain();
+        this.masterGain.connect(this.context.destination);
+
         this.updateMasterGain();
         this.settings.onVolumeChanged.add(this.updateMasterGain);
 
@@ -176,7 +220,17 @@ export class AudioService implements Disposable {
         } else if (this.context.state === "suspended" || this.context.state === "interrupted") {
             this.context.resume().catch((err) => console.log(err));
         } else {
+            for (const audioTrack of this.audioTracks) {
+                audioTrack.stop(0);
+                audioTrack.onEnded.dispose();
+            }
+
             this.context = new AudioContext();
+
+            this.masterGain.disconnect();
+            this.masterGain = this.context.createGain();
+            this.masterGain.connect(this.context.destination);
+
             this.context.resume().catch((err) => console.log(err));
         }
     }
@@ -199,92 +253,30 @@ export class AudioService implements Disposable {
         }
     }
 
-    private waitForRunning() {
-        if (this.context.state === "running") {
-            return Promise.resolve(true);
-        }
-
-        const { promise: stateChangePromise, resolve } = Promise.withResolvers<boolean>();
-
-        const handleStateChange = () => {
-            if (this.context.state === "running") {
-                resolve(true);
-                cleanup();
-            }
-        };
-
-        this.context.addEventListener("statechange", handleStateChange);
-
-        let timer: Timer;
-        const timeoutPromise = new Promise<boolean>((resolve) => {
-            timer = this.timerService.timeout(
-                () => {
-                    resolve(false);
-                    cleanup();
-                },
-                playTimeout,
-                false,
-            );
-        });
-
-        const cleanup = () => {
-            timer.cancel();
-            this.context.removeEventListener("statechange", handleStateChange);
-        };
-
-        return Promise.any([stateChangePromise, timeoutPromise]);
-    }
-
-    play(id: string, loop = false): AudioTrack {
+    createAudioTrack(trackName: string): AudioTrack {
         if (this.disposed) {
             throw new ObjectDisposedError();
         }
 
-        let audioTrack = new AudioTrackInternal();
+        const buffer = this.audioBuffers.get(trackName);
+
+        if (!buffer) {
+            throw new AppError(`Audio asset "${trackName}" not available.`);
+        }
+
+        const audioTrack = new AudioTrackImpl(this.context, this.masterGain, buffer);
         this.audioTracks.add(audioTrack);
 
         audioTrack.onEnded.add(() => {
             this.audioTracks.delete(audioTrack);
-            audioTrack.dispose();
+            (audioTrack as AudioTrackImpl).onEnded.dispose();
         });
-
-        const buffer = this.audioBuffers.get(id);
-
-        if (!buffer) {
-            console.warn(`Audio asset "${id}" not available.`);
-            return audioTrack;
-        }
-
-        this.waitForRunning()
-            .then((canPlay) => {
-                if (!canPlay || this.disposed) {
-                    return;
-                }
-
-                const source = this.context.createBufferSource();
-                const gain = this.context.createGain();
-
-                source.buffer = buffer;
-                source.loop = loop;
-
-                source.connect(gain);
-                gain.connect(this.masterGain);
-                this.masterGain.connect(this.context.destination);
-
-                gain.gain.value = 1;
-
-                audioTrack.init(this.context, source, gain);
-                audioTrack.play();
-            })
-            .catch((reason) => {
-                throw new AppError("Play failed.", { cause: reason });
-            });
 
         return audioTrack;
     }
 
-    static async create(inputSystem: InputSystem, settings: Settings, timerService: TimerService) {
-        return await new AudioService().init(inputSystem, settings, timerService);
+    static async create(inputSystem: InputSystem, settings: Settings) {
+        return await new AudioService().init(inputSystem, settings);
     }
 
     dispose(): void {
@@ -299,7 +291,8 @@ export class AudioService implements Disposable {
         this.settings?.onVolumeChanged.remove(this.updateMasterGain);
 
         for (const audioTrack of this.audioTracks) {
-            audioTrack.dispose();
+            audioTrack.stop(0);
+            audioTrack.onEnded.dispose();
         }
 
         this.audioTracks.clear();

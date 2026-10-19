@@ -20,7 +20,7 @@ const frameText = `COPYRIGHT 2075 ROBCO(R)
     EXEC VERSION 41.12
     64k RAM SYSTEM
     19036 BYTES FREE
-    NO HOLOTAPE FOUND
+    HOLOTAPE FOUND: RUNNING BOY V1.7.3
     LOAD ROM(1) MIKE 319`;
 
 const animationTextSpeed = 60;
@@ -69,7 +69,9 @@ export class BootPanel implements Panel {
         this.header.text = "";
         this.textFrame.text = "";
 
-        const audioTrack = this.ctx.audioService.play(AudioTrackName.TerminalHighFrequency, true);
+        const audioTrack = this.ctx.audioService.createAudioTrack(AudioTrackName.TerminalHighFrequency);
+        audioTrack.loop = true;
+        audioTrack.play();
 
         // We are running navigation all the animations and navigation request in "fire and forget"
         // mode, as making navigation requests when entering or exiting panel is forbidden,
@@ -94,7 +96,7 @@ export class BootPanel implements Panel {
     }
 
     async exit() {
-        this.ctx.audioService.play(AudioTrackName.TerminalScroll);
+        this.ctx.audioService.createAudioTrack(AudioTrackName.TerminalScroll).play();
 
         this.ctx.displayRenderer.effects.requestTextureRepeatChange(false);
         await this.scrollAnimation.play({ timeMultiplier: scrollAnimationSpeed });

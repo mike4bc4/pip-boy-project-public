@@ -13,15 +13,16 @@ const textureModules = import.meta.glob<string>("../../assets/textures/*.{jpg,ex
     eager: true,
 });
 
-const audioModules = import.meta.glob<string>("../../assets/audio/*.ogg", {
+const audioModules = import.meta.glob<string>("../../assets/audio/**/*.ogg", {
     query: "?.inline",
     import: "default",
     eager: true,
 });
 
-const colorTextureConfig = { colorSpace: ColorSpace.SRGB, flipY: false };
-const dataTextureConfig = { colorSpace: ColorSpace.NONE, flipY: false };
-const environmentTextureConfig = { colorSpace: ColorSpace.SRGB, flipY: true };
+const colorTextureConfig = { colorSpace: ColorSpace.SRGB, flipY: false, preloadImage: false };
+const dataTextureConfig = { colorSpace: ColorSpace.NONE, flipY: false, preloadImage: false };
+const environmentTextureConfig = { colorSpace: ColorSpace.SRGB, flipY: true, preloadImage: false };
+const imageTextureConfig = { colorSpace: ColorSpace.NONE, flipY: false, preloadImage: true };
 
 const textureConfigs: Record<string, TextureConfig> = {
     "/textures/arm_d": colorTextureConfig,
@@ -33,6 +34,15 @@ const textureConfigs: Record<string, TextureConfig> = {
     "/textures/pip_boy_parts_e": colorTextureConfig,
     "/textures/pip_boy_secondary_d": colorTextureConfig,
     "/textures/thumb_up": colorTextureConfig,
+    "/textures/game-anim": imageTextureConfig,
+    "/textures/holotape-icon": imageTextureConfig,
+    "/textures/minds-anim": imageTextureConfig,
+    "/textures/minutemen-anim": imageTextureConfig,
+    "/textures/patrol-anim": imageTextureConfig,
+    "/textures/support-anim": imageTextureConfig,
+    "/textures/thumb-up-anim": imageTextureConfig,
+    "/textures/valentine-anim": imageTextureConfig,
+    "/textures/wire-anim": imageTextureConfig,
 };
 
 function pathToId(path: string) {

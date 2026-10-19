@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import { visualizer } from "rollup-plugin-visualizer";
+import { fileURLToPath } from "node:url";
 
 const analyze = process.env.ANALYZE === "true";
 
@@ -29,5 +30,11 @@ export default defineConfig({
         minify: "oxc",
         target: "esnext",
         cssCodeSplit: false,
+    },
+
+    resolve: {
+        alias: {
+            "@game": fileURLToPath(new URL("./src/endless-runner", import.meta.url)),
+        },
     },
 });

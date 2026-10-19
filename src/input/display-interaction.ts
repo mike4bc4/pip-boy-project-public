@@ -51,6 +51,18 @@ export class DisplayInteraction implements Component {
         this.updateHoveredElement(this.inputSystem.position);
     }
 
+    getDisplayElementAt(position: Float2Like) {
+        const intersection = this.getDisplayIntersection(position);
+        if (!intersection || !this.displayContent) {
+            return null;
+        }
+
+        return this.displayContent.getInteractiveElementAt(
+            intersection.x * this.displayContent.width,
+            intersection.y * this.displayContent.height,
+        );
+    }
+
     private getDisplayIntersection(position: Float2Like) {
         const rect = this.inputSystem.canvas.getBoundingClientRect();
 
@@ -66,18 +78,6 @@ export class DisplayInteraction implements Component {
         }
 
         return { x: intersection.uv1.x, y: intersection.uv1.y };
-    }
-
-    private getDisplayElementAt(position: Float2Like) {
-        const intersection = this.getDisplayIntersection(position);
-        if (!intersection || !this.displayContent) {
-            return null;
-        }
-
-        return this.displayContent.getInteractiveElementAt(
-            intersection.x * this.displayContent.width,
-            intersection.y * this.displayContent.height,
-        );
     }
 
     private clearHoveredElement() {

@@ -1,0 +1,3 @@
+interface DialogBox {
+    visible: boolean;
+}
