@@ -121,8 +121,6 @@ export class App implements Disposable {
         await loadingPanel.hideProgressBar(true);
         loadingPanel.hide();
 
-        return;
-
         continuePanel.show();
         continuePanel.showLabel(true);
 
