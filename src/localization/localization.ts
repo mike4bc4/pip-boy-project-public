@@ -67,6 +67,7 @@ export enum Key {
     HolotapeHint = "holotapeHint",
     ReadingHolotape = "readingHolotape",
     Quit = "quit",
+    GameControlsHint = "gameControlsHint",
 }
 
 export enum Locale {

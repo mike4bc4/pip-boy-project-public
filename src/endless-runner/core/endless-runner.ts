@@ -11,7 +11,7 @@ import { UIManager } from "@game/ui/ui-manager";
 import { EnemyManager } from "@game/enemy/enemy-manager";
 import { ScoreManager } from "./score-manager";
 import { Settings } from "../../core/settings";
-import { Localization } from "../../localization/localization";
+import { Key, Localization } from "../../localization/localization";
 import { TimerService } from "../../core/timer-service";
 import { AudioManager } from "@game/audio/audio-manager";
 import { DisplayInteraction } from "../../input/display-interaction";
@@ -19,6 +19,7 @@ import { ResetMode } from "./utils";
 import { NavigationEvents } from "../../display/user-interface/panels/components/navigation-events";
 import { DisplayContentRenderer } from "../../display/display-content-renderer";
 import { throwIfDisposed } from "../../core/disposable";
+import { UIEventBus } from "../../user-interface/ui-event-bus";
 
 const forceMultiplier = 1500;
 const gravity = -1.75;
@@ -37,6 +38,7 @@ interface EndlessRunnerContext {
     displayInteraction: DisplayInteraction;
     navigationEvents: NavigationEvents;
     displayRenderer: DisplayContentRenderer;
+    uiEventBus: UIEventBus;
 }
 
 interface GameContext extends EndlessRunnerContext {
@@ -349,6 +351,7 @@ export class EndlessRunner implements Component {
     private handleLoadingFinished = () => {
         this.restoreGameState();
         this.gameStatus.paused = false;
+        this.ctx.uiEventBus.requestHint(Key.GameControlsHint);
     };
 
     private handleJumpAction() {

@@ -12,6 +12,7 @@ const mobileResolutionScale = 0.5;
 const rootMargin = 16;
 const rootMaxWidth = 1000;
 const rootMinWidth = 400;
+const maxWidthFactor = 0.5;
 
 export interface AppContainerSize {
     width: number;
@@ -129,10 +130,11 @@ export class AppContainer implements Disposable {
         }
 
         const availableWidth = document.documentElement.clientWidth - rootMargin;
-        const width = Math.max(rootMinWidth, Math.min(rootMaxWidth, availableWidth));
+        const maxWidth = Math.max(rootMaxWidth, availableWidth * maxWidthFactor);
+        const width = Math.max(rootMinWidth, Math.min(maxWidth, availableWidth));
 
-        if (this._root.getBoundingClientRect().width !== width) {
-            this._root.style.width = `${width}px`;
+        if (this.root.getBoundingClientRect().width !== width) {
+            this.root.style.width = `${width}px`;
         }
     };
 
